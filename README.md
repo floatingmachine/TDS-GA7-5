@@ -12,3 +12,4 @@ This repository contains a Seaborn barplot visualization of product performance,
 ```bash
 pip install seaborn pandas matplotlib
 python chart.py
+
