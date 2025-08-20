@@ -1,87 +1,62 @@
+---
+
+## 🐍 chart.py  
+
+```python
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from PIL import Image
-import io
 
-# Set random seed for reproducible results
+# -----------------------------
+# 1. Generate synthetic data
+# -----------------------------
 np.random.seed(42)
 
-# Generate realistic synthetic data for marketing campaign effectiveness
-n_campaigns = 120
+products = ["Product A", "Product B", "Product C", "Product D", "Product E"]
+regions = ["North", "South", "East", "West"]
 
-# Generate data with clear patterns
-np.random.seed(42)
-campaign_data = {
-    'marketing_spend': np.random.uniform(10, 100, n_campaigns),  # Marketing spend in thousands
-    'conversion_rate': np.random.uniform(1, 20, n_campaigns),    # Conversion rate percentage
-    'campaign_type': np.random.choice(['Social Media', 'Email', 'PPC', 'Display'], n_campaigns),
-    'duration_days': np.random.randint(7, 60, n_campaigns)
-}
+data = []
+for product in products:
+    for region in regions:
+        sales = np.random.randint(50, 200)  # simulate sales units
+        data.append([product, region, sales])
 
-# Create stronger correlation between spend and conversion
-for i in range(n_campaigns):
-    base_conversion = campaign_data['marketing_spend'][i] * 0.15 + np.random.normal(0, 2)
-    campaign_data['conversion_rate'][i] = max(0.5, min(25, base_conversion))
+df = pd.DataFrame(data, columns=["Product", "Region", "Sales"])
 
-# Create DataFrame
-df = pd.DataFrame(campaign_data)
-
-# Set Seaborn style and context
+# -----------------------------
+# 2. Seaborn Styling
+# -----------------------------
 sns.set_style("whitegrid")
-sns.set_context("notebook", font_scale=1.2)
+sns.set_context("talk")
 
-# Create figure with exact dimensions
-plt.figure(figsize=(8, 8))
+# -----------------------------
+# 3. Create the barplot
+# -----------------------------
+plt.figure(figsize=(8, 8))  # 8x8 inches → 512x512 px at dpi=64
 
-# Create the Seaborn scatterplot - this is the key validation point
-sns.scatterplot(
+ax = sns.barplot(
+    x="Product",
+    y="Sales",
+    hue="Region",
     data=df,
-    x='marketing_spend',
-    y='conversion_rate',
-    hue='campaign_type',
-    size='duration_days',
-    sizes=(60, 200),
-    alpha=0.8,
-    palette='Set2'
+    palette="Set2",
+    errorbar=None
 )
 
-# Customize the plot professionally
-plt.title('Marketing Campaign Effectiveness Analysis\nSpend vs Conversion Rate by Campaign Type', 
-          fontsize=16, fontweight='bold', pad=20)
-plt.xlabel('Marketing Spend (Thousands USD)', fontsize=14, fontweight='semibold')
-plt.ylabel('Conversion Rate (%)', fontsize=14, fontweight='semibold')
+# -----------------------------
+# 4. Chart Customization
+# -----------------------------
+ax.set_title("Quarterly Product Sales by Region", fontsize=16, weight="bold")
+ax.set_xlabel("Product", fontsize=12)
+ax.set_ylabel("Sales Units", fontsize=12)
 
-# Improve legend positioning
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+# Add legend with title
+plt.legend(title="Region", bbox_to_anchor=(1.05, 1), loc='upper left')
 
-# Add subtle grid and styling
-plt.grid(True, alpha=0.3)
-sns.despine()
-
-# Ensure tight layout
+# -----------------------------
+# 5. Save the figure
+# -----------------------------
 plt.tight_layout()
-
-# Save to buffer and resize to exactly 512x512
-buf = io.BytesIO()
-plt.savefig(buf, format='png', dpi=80, facecolor='white', edgecolor='none', 
-            bbox_inches='tight')
-buf.seek(0)
-
-# Resize to exactly 512x512 pixels
-img = Image.open(buf)
-img_resized = img.resize((512, 512), Image.Resampling.LANCZOS)
-img_resized.save('chart.png', 'PNG', optimize=True)
-buf.close()
-
-# Display summary statistics
-print("Marketing Campaign Effectiveness Analysis")
-print("=" * 50)
-print(f"Total Campaigns: {len(df)}")
-print(f"Average Marketing Spend: ${df['marketing_spend'].mean():.2f}K")
-print(f"Average Conversion Rate: {df['conversion_rate'].mean():.2f}%")
-print(f"Correlation (Spend vs Conversion): {df['marketing_spend'].corr(df['conversion_rate']):.3f}")
-print("\nChart generated successfully with Seaborn scatterplot!")
-
-plt.show()
+plt.savefig("chart.png", dpi=64, bbox_inches="tight")
+plt.close()
